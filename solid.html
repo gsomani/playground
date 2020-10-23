@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+   	<head>
+		<meta charset="utf-8"/>
+		<title>Solidification Simulation using Kobayashi's model</title>
+	</head>
+	<body>
+ 	    Initial Temperature<input type="number" id="T_i" step="any" value=0>	
+		Strength of Anisotropy<input type="number" id="delta" step="any" value=0.04>
+		Mode number of Anisotropy<input type="number" id="j" value=6>
+		K <input type="number" id="K" step="any" value=2>
+		Boundary Temperature <input type="number" id="T_b" step="any" value=0>
+		Nucleus<select id="phase_profile">
+	   			  <option value="center">center</option>
+				  <option value="bottom">bottom</option> 		  
+	   			  <option value="left">left</option>
+				  <option value="boundary">boundary</option> 
+				  <option value="deformed">deformed</option> 
+				</select>			
+		<button onclick="run(300,300,0,0,10,10,0);">Play</button>
+		<script src="Solidification.js"></script>
+	</body>
+</html>	
+

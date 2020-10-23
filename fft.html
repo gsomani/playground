@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+   	<head>
+		<meta charset="utf-8"/>
+		<title>Diffraction Pattern using FFT</title>
+	</head>
+	<body>
+		Aperture height<input type="number" id="aperture_height" value=20>
+		Aperture width<input type="number" id="aperture_width" value=20>
+		Aperture Shape<select id="aperture_type">
+							<option value="rectangle">rectangle</option>
+	  						<option value="ellipse">ellipse</option>  
+				  	  </select>
+		<button onclick="run(512);">Play</button>
+		<script src="fft.js"></script>
+	</body>
+</html>	
