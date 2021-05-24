@@ -1,4 +1,4 @@
-var canvas = document.createElement("canvas");
+var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 var pi = Math.PI;
 
@@ -17,20 +17,16 @@ function scale(arr,factor){
 	}
 }
 
-function add_inputs(){
-	var x = document.createElement("input");
-	x.innerHTML = "x";
-	var y = document.createElement("input");
-	y.innerHTMl = "y";
-	var z = document.createElement("input");
-	z.innerHTML = "z";
-	x.type = "number";
-	y.type = "number";
-	z.type = "number";
-
-	document.body.appendChild(x);
-	document.body.appendChild(y);
-	document.body.appendChild(z);
+function add_inputs(cur){
+	document.body.appendChild(document.createTextNode("Direction (x y z) "));
+	var i, x;
+	for(i = 0; i<3;i++){
+		x = document.createElement("input");
+		x.type = "number";
+	        x.name = "x" + i;
+		cur.appendChild(x);
+		cur = x;
+	}
 }
 
 function wulff_net(){
@@ -78,8 +74,7 @@ function wulff_net(){
         ctx.lineTo(cx, cy + 0.5*size);
         ctx.stroke();
 
-	document.body.appendChild(canvas);
-	add_inputs();
+	add_inputs(canvas);
 }
 
 function norm(X){
