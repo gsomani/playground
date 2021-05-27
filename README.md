@@ -1,5 +1,7 @@
 # playground
 
+[Stereographic projection](wulff.html)
+
 [Brillouin Zones of 2D Lattice](BRZ.html)
 
 [Grain orientation using Allen Cahn Model](allen_cahn.html)
