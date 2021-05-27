@@ -1,6 +1,6 @@
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
-var pi = Math.PI;
+var pi = Math.PI,size,factor,cx,cy;
 
 function  great_circle(theta){
     return [-Math.cos(theta)/Math.sin(theta),1/Math.abs(Math.sin(theta))];
@@ -10,36 +10,60 @@ function small_circle(theta){
     return [1/Math.sin(theta),Math.abs(Math.cos(theta)/Math.sin(theta))];
  }
 
-function scale(arr,factor){
-	var i;
-	for(i=0;i<arr.length;i++){
-		arr[i]*=factor;
-	}
+
+function add_number(){
+	document.body.appendChild(document.createElement("br"));	
+
+	document.body.appendChild(document.createTextNode(" Number of points "));
+	var i,j, x;
+	
+            var input = document.createElement("input");
+	    input.type = "number";
+	    input.id = "points";
+	    document.body.appendChild(input);
+	
+	var btn = document.createElement("input");
+	btn.type = "submit";
+	btn.name = "btn";
+	btn.value = "Add points [ direction (x y z)]";
+	document.body.appendChild(btn);
+	btn.onclick = function(){add_inputs()}; 
 }
 
-function add_inputs(cur){
-	document.body.appendChild(document.createTextNode("Direction (x y z) "));
-	var i, x;
-	for(i = 0; i<3;i++){
-		x = document.createElement("input");
-		x.type = "number";
-	        x.name = "x" + i;
-		cur.appendChild(x);
-		cur = x;
+
+function add_inputs(){
+	var n = document.getElementById("points").value;
+	var i,j;
+	for(j = 0; j < n ; j++){
+                document.body.appendChild(document.createElement("br"));	
+		for(i = 0; i<3;i++){
+			x = document.createElement("input");
+			x.type = "number";
+	        	x.id = "x" + i + j;
+			document.body.appendChild(x);
+		}
 	}
+	var btn = document.createElement("input");
+	btn.type = "submit";
+	btn.name = "btn";
+	btn.value = "Draw points";
+	document.body.appendChild(btn);
+	btn.onclick = function(){add_points(n)}; 
 }
 
 function wulff_net(){
-    var th,pad=2;
+    var thi,i;
     var st  = new Array(2);
     var gt  = new Array(2);
     var g  = new Array(2);
     var s  = new Array(2);
     
 	size = document.getElementById("size").value;
-	var factor = 0.5*size,cx,cy;
-       cx = cy = 0.5*size + pad;
-       canvas.width = canvas.height = size + 2*pad;
+	factor = 0.5*size; pad=5;
+	cx = cy = 0.5*size + pad;
+
+	canvas.width = canvas.height = 2*cx;
+	ctx.transform(0.5*size,0,0,-0.5*size,cx,cy);
 	var delta = pi/36;
 	for(i=0, th = -0.5*pi ; th <= 0.5*pi; i++,th+=delta){
     	g = great_circle(th);
@@ -50,31 +74,29 @@ function wulff_net(){
     		st = [-st[0],-st[1]];
     		gt = [-th,th];
 	}
-	scale(g,factor);
-        scale(s,factor);
 	if(i % 3 == 0)
-		ctx.lineWidth = 2;
+		ctx.lineWidth = 1/256;
 	else 
-		ctx.lineWidth = 1;
+		ctx.lineWidth = 1/512;
 	ctx.beginPath();
-	ctx.arc(g[0]+cx, cy , g[1], gt[0], gt[1]);
+	ctx.arc(g[0], 0, g[1], gt[0], gt[1]);
 	ctx.stroke();
 	ctx.beginPath();
-   	ctx.arc(cx, s[0]+cy, s[1], st[0], st[1]);
+   	ctx.arc(0, s[0], s[1], st[0], st[1]);
         ctx.stroke();
 	}
 
 	ctx.beginPath();
-	ctx.moveTo(cx - 0.5*size, cy);
-        ctx.lineTo(cx + 0.5*size, cy);
+	ctx.moveTo(-1 , 0);
+        ctx.lineTo(1, 0);
         ctx.stroke();
 
 	ctx.beginPath();
-	ctx.moveTo(cx, cy - 0.5*size);
-        ctx.lineTo(cx, cy + 0.5*size);
+	ctx.moveTo(0, -1);
+        ctx.lineTo(0, 1);
         ctx.stroke();
 
-	add_inputs(canvas);
+	add_number();
 }
 
 function norm(X){
@@ -85,22 +107,54 @@ function norm(X){
 }
 
 function stereo_cartesian(x,y,z){
-    var m = norm([x,y,z]); 
-    return [x/(m+z),y/(m+z)];
+    m = norm([x,y,z]), n = parseFloat(m) + parseFloat(z);
+    return [x/n,y/n];
 }
 
-function draw_point(x,size,color){
- ctx.fillstyle = color;	
+function draw_point(x,y,z,size,color){
+  var X= new Array(2);
+  X = stereo_cartesian(x,y,z);
+ 
  ctx.beginPath();
- ctx.arc(x[0],x[1], size, 0, 2*pi);
+ ctx.fillStyle = 'rgb('+color[0]+','+color[1]+','+color[2]+')';	
+ctx.arc(X[0],X[1], size, 0, 2*pi);	
  ctx.fill();
 }
 
-function add_point(){
-	x = document.getElementById("x").value;
-	y = document.getElementById("y").value;
-        z = document.getElementById("z").value;
-       var point = new Array(2);
-       point = stereo_cartesian(x,y,z);
-       draw_point(point,2,"blue");
+function set_color(value){
+	var red,green,blue;
+	var parts=Math.floor(4*(1-value));
+	switch(parts)
+	{
+	case 0:
+		red=255;blue=0;
+		green =(1-value)*1020;
+		break;
+	case 1:  
+		green=255;blue=0;
+		red = (value-0.5)*1020;
+		break;
+	case 2:  
+		red=0;green=255;
+		blue = (0.5-value)*1020;
+		break;	
+	case 3: 
+		red=0;blue=255;
+		green = value*1020;
+		break;
+	default : if(parts<0) {red=255;green=blue=0;} 
+			  if(parts>0) {red=green=0;blue=255;} 	
+	}
+	red=Math.round(red);green=Math.round(green);blue=Math.round(blue);
+	return [red,green,blue];
+}
+
+function add_points(n){	
+	var x,y,z,i,max = 255, levels = color = new Array(3);
+	for(i=0;i<n;i++){
+	x = document.getElementById("x0"+i).value;
+	y = document.getElementById("x1"+i).value;
+        z = document.getElementById("x2"+i).value;
+	draw_point(x,y,z,1/64,set_color(i/(n-1)));
+	}
 }
