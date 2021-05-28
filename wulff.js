@@ -13,7 +13,6 @@ function small_circle(theta){
 
 function add_number(){
 	document.body.appendChild(document.createElement("br"));	
-
 	document.body.appendChild(document.createTextNode(" Number of points "));
 	var i,j, x;
 	
@@ -35,7 +34,8 @@ function add_inputs(){
 	var n = document.getElementById("points").value;
 	var i,j;
 	for(j = 0; j < n ; j++){
-                document.body.appendChild(document.createElement("br"));	
+                document.body.appendChild(document.createElement("br"));
+		document.body.appendChild(document.createTextNode((j+1)+")"));
 		for(i = 0; i<3;i++){
 			x = document.createElement("input");
 			x.type = "number";
@@ -52,40 +52,82 @@ function add_inputs(){
 }
 
 function wulff_net(){
-    var thi,i;
+    var i;
     var st  = new Array(2);
     var gt  = new Array(2);
     var g  = new Array(2);
     var s  = new Array(2);
     
 	size = document.getElementById("size").value;
-	factor = 0.5*size; pad=5;
+	factor = 0.5*size; pad=20;
 	cx = cy = 0.5*size + pad;
 
+	var deg = "\u00B0";
+	var font_size = 1/16, pos = new Array(2);
 	canvas.width = canvas.height = 2*cx;
 	ctx.transform(0.5*size,0,0,-0.5*size,cx,cy);
-	var delta = pi/36;
+	var delta = pi/36,th_d;
+	ctx.fillStyle = "red";
+	ctx.font = font_size + "px Comic Sans MS";
+	
+	var vert=new Array(2);
 	for(i=0, th = -0.5*pi ; th <= 0.5*pi; i++,th+=delta){
-    	g = great_circle(th);
+    	
+	th_d = -90 + i*5;
+	g = great_circle(th);
     	s = small_circle(th);
 	st = [0.5*pi + th, 0.5*pi - th];
 	gt = [pi + th, pi - th];
+	ctx.globalAlpha = 1;
     	if(th>0){
     		st = [-st[0],-st[1]];
     		gt = [-th,th];
 	}
-	if(i % 3 == 0)
-		ctx.lineWidth = 1/256;
-	else 
+	
+	
+	pos = [Math.cos(th),Math.sin(th)];
+	
+		if(i % 3 == 0){
 		ctx.lineWidth = 1/512;
+		
+		if(pos[1]<0)
+			vert = [0,0.5*font_size]; 
+		else
+			vert = [0.5*font_size,0];
+
+		if(th_d != 90 &&  th_d != -90  && th_d)
+		{
+			ctx.save();
+			ctx.scale(1,-1);
+			ctx.textAlign = "right";
+			ctx.fillText(-th_d + deg, -pos[0], pos[1] + vert[0]);
+			ctx.textAlign = "left";
+			ctx.fillText(th_d + deg, pos[0], -pos[1] + vert[1]);
+			ctx.restore();
+		}
+	}
+	else 
+		ctx.lineWidth = 1/1024;
 	ctx.beginPath();
 	ctx.arc(g[0], 0, g[1], gt[0], gt[1]);
 	ctx.stroke();
 	ctx.beginPath();
    	ctx.arc(0, s[0], s[1], st[0], st[1]);
         ctx.stroke();
+
 	}
 
+	ctx.save();
+	ctx.scale(1,-1);
+	ctx.textAlign = "right";
+	ctx.fillText(0 + deg, -1, 0.25*font_size);
+	ctx.textAlign = "left";
+	ctx.fillText(0 + deg, 1, 0.25*font_size);
+	ctx.textAlign = "center";
+	ctx.fillText(90 + deg, 0, -1);
+	ctx.fillText(-90 + deg, 0, 1 + 0.5*font_size);	
+	ctx.restore();
+	
 	ctx.beginPath();
 	ctx.moveTo(-1 , 0);
         ctx.lineTo(1, 0);
