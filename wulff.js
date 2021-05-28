@@ -65,9 +65,9 @@ function wulff_net(){
 	var deg = "\u00B0";
 	var font_size = 1/16, pos = new Array(2);
 	canvas.width = canvas.height = 2*cx;
+	canvas.width += 4*pad;
 	ctx.transform(0.5*size,0,0,-0.5*size,cx,cy);
 	var delta = pi/36,th_d;
-	ctx.fillStyle = "red";
 	ctx.font = font_size + "px Comic Sans MS";
 	
 	var vert=new Array(2);
@@ -108,6 +108,7 @@ function wulff_net(){
 	}
 	else 
 		ctx.lineWidth = 1/1024;
+	
 	ctx.beginPath();
 	ctx.arc(g[0], 0, g[1], gt[0], gt[1]);
 	ctx.stroke();
@@ -153,15 +154,18 @@ function stereo_cartesian(x,y,z){
     return [x/n,y/n];
 }
 
-function draw_point(x,y,z,size,color){
-  var X= new Array(2);
-  X = stereo_cartesian(x,y,z);
- 
+function add_color_point(ctx,X,size,color){
  ctx.beginPath();
  ctx.fillStyle = 'rgb('+color[0]+','+color[1]+','+color[2]+')';	
 ctx.arc(X[0],X[1], size, 0, 2*pi);	
  ctx.fill();
 }
+
+function draw_point(x,y,z,size,color){
+  var X= new Array(2);
+  X = stereo_cartesian(x,y,z);
+  add_color_point(ctx,X,size,color);
+} 
 
 function set_color(value){
 	var red,green,blue;
@@ -192,11 +196,22 @@ function set_color(value){
 }
 
 function add_points(n){	
-	var x,y,z,i,max = 255, levels = color = new Array(3);
+	var pos_y,x,y,z,i,max = 255, color = new Array(3);
 	for(i=0;i<n;i++){
 	x = document.getElementById("x0"+i).value;
 	y = document.getElementById("x1"+i).value;
         z = document.getElementById("x2"+i).value;
-	draw_point(x,y,z,1/64,set_color(i/(n-1)));
+	color = set_color(i/(n-1));
+	draw_point(x,y,z,1/64,color);
+	
+	ctx.save();
+	ctx.scale(1,-1);
+	pos_y = -1 + i/16;
+
+	add_color_point(ctx,[1+3*pad/size, pos_y],1/64,color);
+
+	ctx.fillText( "("+x+" "+y+" "+z+")", 1+ 4*pad/size , pos_y);
+	ctx.restore();
+
 	}
 }
