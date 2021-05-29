@@ -206,11 +206,11 @@ function add_points(n){
 	
 	ctx.save();
 	ctx.scale(1,-1);
-	pos_y = -1 + i/16;
+	pos_y = -1 + (i+1)/16;
 
 	add_color_point(ctx,[1+3*pad/size, pos_y],1/64,color);
 
-	ctx.fillText( "("+x+" "+y+" "+z+")", 1+ 4*pad/size , pos_y);
+	ctx.fillText( "("+x+" "+y+" "+z+")", 1+ 4*pad/size , pos_y + 1/64);
 	ctx.restore();
 
 	}
