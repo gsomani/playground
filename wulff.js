@@ -32,10 +32,13 @@ function add_number(){
 
 function add_inputs(){
 	var n = document.getElementById("points").value;
-	var i,j;
-	for(j = 0; j < n ; j++){
+	var i,j,x;
+	for(j = 0; j <= n ; j++){
                 document.body.appendChild(document.createElement("br"));
-		document.body.appendChild(document.createTextNode((j+1)+")"));
+		if(j==0)
+			document.body.appendChild(document.createTextNode(" Zone Axis"));
+		else
+			document.body.appendChild(document.createTextNode(j+")"));
 		for(i = 0; i<3;i++){
 			x = document.createElement("input");
 			x.type = "number";
@@ -142,29 +145,102 @@ function wulff_net(){
 	add_number();
 }
 
-function norm(X){
-	var i,sum;
-	for(i=0,sum=0;i<X.length;i++)
-		sum += X[i]*X[i];
-	return Math.sqrt(sum);
+// Create 2D array
+function new2dArray(rows,columns)
+{ var i,j,x;
+  x=new Array(rows);
+  for(i=0;i<rows;i++)
+  	x[i]=new Array(columns);
+  return x;		
 }
 
-function stereo_cartesian(x,y,z){
-    m = norm([x,y,z]), n = parseFloat(m) + parseFloat(z);
-    return [x/n,y/n];
+class Matrix{
+	
+	constructor(m,n){
+        var i,j;
+	if(arguments.length==1){
+		this.rows=1;
+		this.cols=m.length;
+		this.matrix=new2dArray(this.rows,this.cols);
+		for(i=0;i<this.cols;i++)
+			this.matrix[0][i]=m[i];
+	}
+
+	else {		
+	this.rows=m;
+	this.cols=n;
+        this.matrix = new2dArray(m,n);
+	for(i=0;i<m;i++)
+		for(j=0;j<n;j++)
+			this.matrix[i][j]=0;
+	}
+	}
+	transpose(){
+	var i,j,A;
+        A=new Matrix(this.cols,this.rows);
+            for(i=0;i<this.rows;i++)
+		for(j=0;j<this.cols;j++)
+                       A.matrix[j][i] = this.matrix[i][j];
+        return A;
+	}
+
+	dot(B){
+	var i,j,k,A;
+        A=new Matrix(this.rows,B.cols);
+            for(i=0;i<this.rows;i++)
+		for(j=0;j<B.cols;j++)
+			for(k=0;k<this.cols;k++)
+                       		A.matrix[i][j]+=this.matrix[i][k]*B.matrix[k][j];
+        return A;
+	}
+
+	transform(v){
+	var V = new Matrix(v), M; 
+	M = this.dot(V.transpose());
+	return M.transpose().matrix[0];
+	}
+};
+
+function dot(a,b){
+	var i,sum;
+	for(i=0,sum=0;i<a.length;i++){
+		sum += a[i]*b[i];
+	}
+	return sum;
+}
+
+function norm(X){
+	return Math.sqrt(dot(X,X));
+}
+
+function transform_matrix(X){
+ var R = new Matrix(3,3), a, r = new Array(2);
+ a = Math.sqrt(1-X[1]*X[1]);
+ r = [X[0]/a,X[2]/a]; 
+ R.matrix[0] = [r[1],0,-r[0]];
+ R.matrix[1] = [-X[1]*r[0],a,-X[1]*r[1]];
+ R.matrix[2] = X;
+ return R;
+}
+
+function stereo_cartesian(x){
+    var xx = new Array(2);
+    for(i=0;i<2;i++)
+	xx[i] = x[i]/(1+x[2]);
+    return xx;
 }
 
 function add_color_point(ctx,X,size,color){
  ctx.beginPath();
  ctx.fillStyle = 'rgb('+color[0]+','+color[1]+','+color[2]+')';	
-ctx.arc(X[0],X[1], size, 0, 2*pi);	
+ctx.arc(X[0],X[1], size, 0, 2*pi);
  ctx.fill();
 }
 
-function draw_point(x,y,z,size,color){
+function draw_point(x,size,color){
   var X= new Array(2);
-  X = stereo_cartesian(x,y,z);
-  add_color_point(ctx,X,size,color);
+  X = stereo_cartesian(x);
+add_color_point(ctx,X,size,color);
 } 
 
 function set_color(value){
@@ -195,22 +271,44 @@ function set_color(value){
 	return [red,green,blue];
 }
 
+function normalise(x){
+	var i,y = new Array(x.length),m;
+	m = norm(x);
+	for(i=0;i<x.length;i++)
+		y[i] = x[i]/m;
+	return y;
+}
+
 function add_points(n){	
-	var pos_y,x,y,z,i,max = 255, color = new Array(3);
-	for(i=0;i<n;i++){
+	var pos_y,x,y,z,i,max = 255, color = new Array(3), axis = new Array(3);
+	var m, vec = new Array(3),R = new Matrix(3,3);
+	for(i=0;i<=n;i++){
 	x = document.getElementById("x0"+i).value;
 	y = document.getElementById("x1"+i).value;
-        z = document.getElementById("x2"+i).value;
-	color = set_color(i/(n-1));
-	draw_point(x,y,z,1/64,color);
+        z = document.getElementById("x2"+i).value;	
+
+	vec = normalise([x,y,z]);
+
+        if(i==0){
+		axis = [vec[0],vec[1],vec[2]];
+		R = transform_matrix(axis);
+		console.log(R);
+	}
+	color = set_color(i/n);
+		
+	vec = R.transform(vec);
+	
+	draw_point(vec,1/64,color);
 	
 	ctx.save();
 	ctx.scale(1,-1);
 	pos_y = -1 + (i+1)/16;
 
-	add_color_point(ctx,[1+3*pad/size, pos_y],1/64,color);
+	if(vec[2]>=0){
+		add_color_point(ctx,[1+3*pad/size, pos_y],1/64,color);
 
-	ctx.fillText( "("+x+" "+y+" "+z+")", 1+ 4*pad/size , pos_y + 1/64);
+		ctx.fillText( "("+x+" "+y+" "+z+")", 1+ 4*pad/size , pos_y + 1/64);
+	}
 	ctx.restore();
 
 	}
