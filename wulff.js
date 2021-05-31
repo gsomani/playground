@@ -10,27 +10,8 @@ function small_circle(theta){
     return [1/Math.sin(theta),Math.abs(Math.cos(theta)/Math.sin(theta))];
  }
 
-
-function add_number(){
-	document.body.appendChild(document.createElement("br"));	
-	document.body.appendChild(document.createTextNode(" Number of points "));
-	var i,j, x;
-	
-            var input = document.createElement("input");
-	    input.type = "number";
-	    input.id = "points";
-	    document.body.appendChild(input);
-	
-	var btn = document.createElement("input");
-	btn.type = "submit";
-	btn.name = "btn";
-	btn.value = "Add points [ direction (x y z)]";
-	document.body.appendChild(btn);
-	btn.onclick = function(){add_inputs()}; 
-}
-
-
 function add_inputs(){
+	document.getElementById("add_net").disabled = true;
 	var n = document.getElementById("points").value;
 	var i,j,x;
 	for(j = 0; j <= n ; j++){
@@ -50,8 +31,9 @@ function add_inputs(){
 	btn.type = "submit";
 	btn.name = "btn";
 	btn.value = "Draw points";
+	btn.id = "draw";
 	document.body.appendChild(btn);
-	btn.onclick = function(){add_points(n)}; 
+	btn.onclick = function(){add_points(n)};
 }
 
 function wulff_net(){
@@ -142,7 +124,7 @@ function wulff_net(){
         ctx.lineTo(0, 1);
         ctx.stroke();
 
-	add_number();
+	add_inputs();
 }
 
 // Create 2D array
@@ -243,34 +225,6 @@ function draw_point(x,size,color){
 add_color_point(ctx,X,size,color);
 } 
 
-function set_color(value){
-	var red,green,blue;
-	var parts=Math.floor(4*(1-value));
-	switch(parts)
-	{
-	case 0:
-		red=255;blue=0;
-		green =(1-value)*1020;
-		break;
-	case 1:  
-		green=255;blue=0;
-		red = (value-0.5)*1020;
-		break;
-	case 2:  
-		red=0;green=255;
-		blue = (0.5-value)*1020;
-		break;	
-	case 3: 
-		red=0;blue=255;
-		green = value*1020;
-		break;
-	default : if(parts<0) {red=255;green=blue=0;} 
-			  if(parts>0) {red=green=0;blue=255;} 	
-	}
-	red=Math.round(red);green=Math.round(green);blue=Math.round(blue);
-	return [red,green,blue];
-}
-
 function normalise(x){
 	var i,y = new Array(x.length),m;
 	m = norm(x);
@@ -282,6 +236,7 @@ function normalise(x){
 function add_points(n){	
 	var pos_y,x,y,z,i,max = 255, color = new Array(3), axis = new Array(3);
 	var m, vec = new Array(3),R = new Matrix(3,3);
+	document.getElementById("draw").disabled = true;	
 	for(i=0;i<=n;i++){
 	x = document.getElementById("x0"+i).value;
 	y = document.getElementById("x1"+i).value;
@@ -294,7 +249,7 @@ function add_points(n){
 		R = transform_matrix(axis);
 		console.log(R);
 	}
-	color = set_color(i/n);
+	color = [Math.random()*255,Math.random()*255,Math.random()*255]
 		
 	vec = R.transform(vec);
 	

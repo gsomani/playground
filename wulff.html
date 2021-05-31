@@ -3,35 +3,11 @@
    	<head>
 		<meta charset="utf-8"/>
 		<title>Stereographic Projection</title>
-	<script type='text/javascript'>
-        function addFields(){
-            // Number of inputs to create
-            var number = document.getElementById("member").value;
-            // Container <div> where dynamic content will be placed
-            var container = document.getElementById("container");
-            // Clear previous contents of the container
-            while (container.hasChildNodes()) {
-                container.removeChild(container.lastChild);
-            }
-            for (i=0;i<number;i++){
-                // Append a node with a random text
-                container.appendChild(document.createTextNode("Member " + (i+1)));
-                // Create an <input> element, set its type and name attributes
-                var input = document.createElement("input");
-                input.type = "text";
-                input.name = "member" + i;
-                container.appendChild(input);
-                // Append a line break
-                container.appendChild(document.createElement("br"));
-            }
-        }
-    </script>
-
 	</head>
 	<body> 
-		Size <input type="number" id="size" steps="any" number="500">(in pixels)
-		<button onclick="wulff_net();">Draw Stereogram</button>	
-	        <canvas id="canvas"></canvas>
+		Size <input type="number" id="size" value="500">(in pixels)</br>
+		Number of points <input type="number" id="points" value="0">
+		<button onclick="wulff_net();" id="add_net">Enter points ( direction [x y z])</button>			<canvas id="canvas"></canvas>
 	<script src="wulff.js"></script>
 	</body>
 </html>	
